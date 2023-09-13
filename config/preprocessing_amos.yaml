@@ -5,7 +5,8 @@ dataset_config: amos
 dataset_name: amos_256_256_128
 modality: CT
 seed: 10
-path_to_dataset: TODO
+path_to_dataset: /mnt/datalake/DataLibrary/opendata/liver/AMOS2022
+path_to_split: /mnt/datalake/DS-lake/vankhoa/AMOS2022/
 
 # Preprocessing
 train: 160

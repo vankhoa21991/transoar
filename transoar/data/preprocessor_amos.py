@@ -56,6 +56,12 @@ class PreProcessor:
                 path_image, path_label = self._path_to_dataset / case['image'], self._path_to_dataset / case['label']
                 case_name = case['image'].split('/')[-1][5:9]
 
+                path_to_case = self._path_to_splits / split_name / case_name
+
+                # if os.path.exists(str(path_to_case / 'data.npy')) and os.path.exists(str(path_to_case / 'label.npy')):
+                #     logging.info(f"Skipped case {case_name} due to already existing files.")
+                #     continue
+
                 case_dict = {
                         'image': path_image,
                         'label': path_label
@@ -104,8 +110,6 @@ class PreProcessor:
 
                 logging.info(f'Successfull prepared case {case_name} of shape {image.shape}.')
 
-                path_to_case = self._path_to_splits / split_name / case_name
-                
                 os.makedirs(path_to_case)
 
                 np.save(str(path_to_case / 'data.npy'), image.astype(np.float32))
@@ -161,9 +165,9 @@ class PreProcessor:
         return list(data[mask.astype(bool)][::subsample])
     
     def _get_shape_statistics(self):
-        shapes = np.array(self._shapes, dtype=np.int)[:, 1:]
+        shapes = np.array(self._shapes, dtype=np.int32)[:, 1:]
         shape_statistics = {
-            "median": np.median(shapes, axis=0).astype(np.int).tolist(),
+            "median": np.median(shapes, axis=0).astype(np.int32).tolist(),
             "mean": np.mean(shapes, axis=0).tolist(),
             "min": np.min(shapes, axis=0).tolist(),
             "max": np.max(shapes, axis=0).tolist(),
@@ -173,14 +177,14 @@ class PreProcessor:
         return shape_statistics
 
     def _get_voxel_statistics(self):
-        norm_voxels = np.array(self._norm_voxels, dtype=np.float)
+        norm_voxels = np.array(self._norm_voxels, dtype=np.float32)
         voxel_statistics = {
-            "median": np.median(norm_voxels),
-            "mean": np.mean(norm_voxels),
-            "std": np.std(norm_voxels),
-            "min": np.min(norm_voxels),
-            "max": np.max(norm_voxels),
-            "percentile_99_5": np.percentile(norm_voxels, 99.5),
-            "percentile_00_5": np.percentile(norm_voxels, 0.5),
+            "median": np.median(norm_voxels).tolist(),
+            "mean": np.mean(norm_voxels).tolist(),
+            "std": np.std(norm_voxels).tolist(),
+            "min": np.min(norm_voxels).tolist(),
+            "max": np.max(norm_voxels).tolist(),
+            "percentile_99_5": np.percentile(norm_voxels, 99.5).tolist(),
+            "percentile_00_5": np.percentile(norm_voxels, 0.5).tolist(),
         }
         return voxel_statistics

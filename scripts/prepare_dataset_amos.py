@@ -18,17 +18,21 @@ if __name__ == "__main__":
     preprocessing_config = get_config('preprocessing_amos')
     data_config = get_config(preprocessing_config['dataset_config'])
 
+    print(preprocessing_config)
+    print(data_config)
+
     random.seed(preprocessing_config['seed'])  # Set arbitrary seed to make experiments reproducible
 
     dataset_name = preprocessing_config['dataset_name']
     modality = preprocessing_config['modality']
     path_dataset = Path(preprocessing_config['path_to_dataset'])   # complete dataset 
-    path_to_splits = Path(f"./dataset/{dataset_name}_{modality}")
+    path_to_splits = Path(f"{preprocessing_config['path_to_split']}/{dataset_name}_{modality}")
 
     data_info = load_json(path_dataset / 'task1_dataset.json')
 
     # Get paths to train cases
     cases = data_info['training']
+    print(cases)
     random.shuffle(cases)
 
     # Create test, val, and train split

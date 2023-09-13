@@ -80,8 +80,8 @@ def train(config, args):
         metric_start_val = 0
 
     # Init logging
-    path_to_run = Path(os.getcwd()) / 'runs' / config['experiment_name']
-    path_to_run.mkdir(exist_ok=True)
+    path_to_run = Path(config['path_to_run']) / config['experiment_name']
+    os.makedirs(path_to_run, exist_ok=True)
 
     # Get meta data and write config to run
     config.update(get_meta_data())
