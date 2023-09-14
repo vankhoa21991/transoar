@@ -17,7 +17,7 @@ from transoar.inference import inference
 class Tester:
 
     def __init__(self, args):
-        path_to_run = Path('./runs/' + args.run)
+        path_to_run = Path(args.run)
         config = load_json(path_to_run / 'config.json')
         self._config = config
 
