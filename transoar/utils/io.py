@@ -32,7 +32,7 @@ def get_config(config_name):
 
     # Add dataset config
     if 'dataset' in config:
-        path_to_data_info = Path(os.getcwd()) / 'dataset' / config['dataset'] / 'data_info.json'
+        path_to_data_info = Path(config['path_to_split']) / config['dataset'] / 'data_info.json'
         config.update(load_json(path_to_data_info))
 
     return config
