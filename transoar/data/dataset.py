@@ -15,7 +15,8 @@ class TransoarDataset(Dataset):
         assert split in ['train', 'val', 'test']
         self._config = config
 
-        data_dir = Path(config['path_to_split']).resolve()
+        data_dir = Path(config['path_to_split'].replace('datalake/', 'datalake/JST000AI53_5/')).resolve()
+        # data_dir = Path(config['path_to_split']).resolve()
         self._path_to_split = data_dir / self._config['dataset'] / split
         self._data = [data_path.name for data_path in self._path_to_split.iterdir()]
 

@@ -128,7 +128,8 @@ class Tester:
 
                     save_attn_visualization(
                         out, backbone_features, dec_cross_attn_weights, list(data.shape[-3:]),
-                        seg_mask[0], idx, dec_self_attn_weights, self._config
+                        seg_mask[0], idx, dec_self_attn_weights, self._config, num_orgs=len(self._class_dict),
+                        path=self._path_to_vis
                     )
 
             # Get and store final results

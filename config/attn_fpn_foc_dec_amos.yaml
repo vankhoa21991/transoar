@@ -6,8 +6,8 @@ device: cuda:0
 val_interval: 1
 debug_mode: False  # Doesn't save checkpoints
 seed: 10
-path_to_split: /mnt/datalake/DS-lake/vankhoa/AMOS2022/
-path_to_run: /mnt/datalake/DS-lake/vankhoa/AMOS2022/output/
+path_to_split: /mnt/datalake/JST000AI53_5/DS-lake/vankhoa/AMOS2022/
+path_to_run: /mnt/datalake/JST000AI53_5/DS-lake/vankhoa/AMOS2022/outputtest/
 
 epochs: 3000
 lr: 2e-4

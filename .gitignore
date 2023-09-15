@@ -7,7 +7,7 @@
 
 # IDE
 .vscode/
-
+.idea
 # PyCache
 __pycache__/
 *.pyc
