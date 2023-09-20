@@ -1,0 +1,19 @@
+# Config file for preprocessing related params for amos
+
+# General
+dataset_config: luna16
+dataset_name: luna16_512_512_256
+modality: CT
+seed: 10
+path_to_dataset: /mnt/datalake/DS-lake/vankhoa/Task016_Luna
+path_to_split: /mnt/datalake/DS-lake/vankhoa/Task402_transoar_Luna16
+fold: 0
+
+# Preprocessing
+fixed_size: True
+foreground_normalization: True
+resize_shape: [512, 512, 256]
+cropping: True
+key: image # [image, label]
+margin: 2
+orientation: RAS

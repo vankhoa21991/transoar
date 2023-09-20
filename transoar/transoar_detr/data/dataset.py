@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from transoar.data.transforms import get_transforms
+from transoar.transoar_detr.data.transforms import get_transforms
 
 
 class TransoarDataset(Dataset):
@@ -16,6 +16,7 @@ class TransoarDataset(Dataset):
         self._config = config
 
         data_dir = Path(config['path_to_split']).resolve()
+        # data_dir = Path(config['path_to_split'].replace('/mnt/datalake/DS-lake/', '/opt/data/')).resolve()
         self._path_to_split = data_dir / self._config['dataset'] / split
         self._data = [data_path.name for data_path in self._path_to_split.iterdir()]
 
@@ -34,6 +35,7 @@ class TransoarDataset(Dataset):
 
         # Load npy files
         data, label = np.load(data_path), np.load(label_path)
+        # print(np.unique(label), label.shape)
 
         if self._config['augmentation']['use_augmentation']:
             data_dict = {
@@ -48,5 +50,5 @@ class TransoarDataset(Dataset):
             data, label = data_transformed['image'], data_transformed['label']
         else:
             data, label = torch.tensor(data), torch.tensor(label)
-
+        # print(label.unique(), label.shape)
         return data, label

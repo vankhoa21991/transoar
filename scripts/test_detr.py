@@ -3,24 +3,24 @@
 import os
 import argparse
 from pathlib import Path
+from collections import defaultdict
 
 import torch
 from tqdm import tqdm
 
-from transoar.utils.io import load_json, write_json
-from transoar.utils.visualization import save_attn_visualization, save_pred_visualization
-from transoar.data.dataloader import get_loader
-from transoar.models.transoarnet import TransoarNet
-from transoar.evaluator import DetectionEvaluator
-from transoar.inference import inference
+from transoar.transoar_detr.utils.io import load_json, write_json
+from transoar.transoar_detr.utils.visualization import save_attn_visualization, save_pred_visualization
+from transoar.transoar_detr.data.dataloader import get_loader
+from transoar.transoar_detr.models.transoarnet import TransoarNet
+from transoar.transoar_detr.evaluator import DetectionEvaluator
+from transoar.transoar_detr.inference import inference
 
 class Tester:
 
     def __init__(self, args):
         path_to_run = Path(args.run)
         config = load_json(path_to_run / 'config.json')
-        self._config = config
-
+        print(config)
         self._save_preds = args.save_preds
         self._save_attn_map = args.save_attn_map
         self._full_labeled = args.full_labeled
@@ -48,10 +48,11 @@ class Tester:
             classes_large=config['labels_large'],
             iou_range_nndet=(0.1, 0.5, 0.05),
             iou_range_coco=(0.5, 0.95, 0.05),
-            sparse_results=False
+            sparse_results=True
         )
 
         self._model = TransoarNet(config).to(device=self._device)
+        self._layer = int(config['backbone']['out_fmaps'][0][-1])
 
         # Load checkpoint
         checkpoint = torch.load(path_to_ckpt, map_location=self._device)
@@ -75,11 +76,8 @@ class Tester:
                 self._model._backbone._decoder._out[0].register_forward_hook(
                     lambda self, input, output: backbone_features_list.append(output)
                 ),
-                self._model._neck.decoder.layers[-1].cross_attn.register_forward_hook(
-                    lambda self, input, output: dec_attn_weights_list.append(output[-1])
-                ),
-                self._model._neck.decoder.layers[-1].self_attn.register_forward_hook(
-                    lambda self, input, output: dec_attn_weights_list.append(output[-1])
+                self._model._neck.decoder.layers[-1].multihead_attn.register_forward_hook(
+                    lambda self, input, output: dec_attn_weights_list.append(output[1])
                 )
             ]
     
@@ -99,9 +97,12 @@ class Tester:
 
                 # Make prediction
                 out = self._model(data)
-                print(out.keys())
+                # model_out = {k: v.cpu().squeeze() for k, v in out.items() if k not in ['aux_outputs', 'pred_seg']}
+                # print([a for a in out['pred_logits']])
+                # print(out.keys())
+
                 # Format out to fit evaluator and estimate best predictions per class
-                pred_boxes, pred_classes, pred_scores = inference(out, len(self._class_dict))
+                pred_boxes, pred_classes, pred_scores = inference(out)
                 gt_boxes = [targets['boxes'].detach().cpu().numpy()]
                 gt_classes = [targets['labels'].detach().cpu().numpy()]
 
@@ -123,16 +124,16 @@ class Tester:
                 if self._save_attn_map:
                     # Get current attn weights
                     backbone_features = backbone_features_list.pop(-1).squeeze()
-                    dec_cross_attn_weights = dec_attn_weights_list.pop(-1).squeeze()
-                    dec_self_attn_weights = dec_attn_weights_list.pop(-1).squeeze()
+                    dec_attn_weights = dec_attn_weights_list.pop(-1).squeeze()
 
                     save_attn_visualization(
-                        out, backbone_features, dec_cross_attn_weights, list(data.shape[-3:]),
-                        seg_mask[0], idx, dec_self_attn_weights, self._config, num_orgs=len(self._class_dict),
-                        path=self._path_to_vis
+                        out, backbone_features, dec_attn_weights, list(data.shape[-3:]),
+                        seg_mask[0],
+                        idx, path=self._path_to_vis
                     )
 
             # Get and store final results
+            # [torch.tensor([id_ for score, id_ in query_info[c]]).unique().shape for c in query_info.keys()]
             metric_scores = self._evaluator.eval()
             write_json(metric_scores, self._path_to_results / ('results_' + self._set_to_eval))
 

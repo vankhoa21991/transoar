@@ -26,15 +26,7 @@ def crop_air(x):
     # To not crop fat which is -120 to -90
     return x > -500
 
-def crop_labels(x):
-    # crop based on organ boundaries
-    mask = (x == 6) | (x == 7) | (x == 15) | (x == 14)| (x == 1)
-    return mask
-
-def crop_fg(x):
-    return x > 0
-
-def transform_preprocessing_amos(
+def transform_preprocessing(
     margin, crop_key, orientation, resize_shape
 ):
     transform_list = [
@@ -42,50 +34,15 @@ def transform_preprocessing_amos(
         EnsureChannelFirstd(keys=["image", "label"]),
         Orientationd(keys=["image", "label"], axcodes=orientation),
         CropForegroundd(
-            keys=["image", "label"], source_key='label', 
-            margin=[2, 2, 2], select_fn=crop_labels
+            keys=["image", "label"], source_key=crop_key, 
+            margin=margin, select_fn=crop_air
         ),
         Resized(
             keys=['image', 'label'], spatial_size=resize_shape,
             mode=['area', 'nearest']
         )
     ]
-    return Compose(transform_list)
 
-def transform_preprocessing_luna16(
-    margin, crop_key, orientation, resize_shape
-):
-    transform_list = [
-        LoadImaged(keys=["image", "label"], reader="NibabelReader"),
-        EnsureChannelFirstd(keys=["image", "label"]),
-        Orientationd(keys=["image", "label"], axcodes=orientation),
-        Resized(
-            keys=['image', 'label'], spatial_size=resize_shape,
-            mode=['area', 'nearest']
-        )
-    ]
-    return Compose(transform_list)
-
-def transform_preprocessing_visceral(
-    margin, crop_key, orientation, resize_shape
-):
-    transform_list = [
-        LoadImaged(keys=["image", "label"]),
-        EnsureChannelFirstd(keys=["image", "label"]),
-        Orientationd(keys=["image", "label"], axcodes=orientation),
-        # CropForegroundd(
-        #     keys=["image", "label"], source_key=crop_key, 
-        #     margin=margin, select_fn=crop_air
-        # ),
-        CropForegroundd(
-            keys=["image", "label"], source_key='label', 
-            margin=margin, select_fn=crop_fg
-        ),
-        Resized(
-            keys=['image', 'label'], spatial_size=resize_shape,
-            mode=['area', 'nearest']
-        )
-    ]
     return Compose(transform_list)
 
 def get_transforms(split, config):

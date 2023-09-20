@@ -1,0 +1,6 @@
+# Config file of luna16 dataset
+
+num_classes: 1
+labels:
+  1: nodule
+
